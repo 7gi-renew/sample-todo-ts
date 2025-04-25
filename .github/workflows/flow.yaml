@@ -1,13 +1,15 @@
 name: GitHub Deploy
+
 on:
   push:
      branches: 
         - main
 
 jobs:
-  first-job: 
+  echo: 
     name: first job
     steps:
-      - run: echo "hello world"
+      - name: echo message
+        run: echo "hello world"
 
 

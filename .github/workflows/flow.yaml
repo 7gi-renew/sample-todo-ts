@@ -10,5 +10,5 @@ jobs:
     name: first job
     runs-on: ubuntu-latest
     steps:
-      - name: echo message
-        run: echo "hello world"
+      - name: install
+        run: npm install

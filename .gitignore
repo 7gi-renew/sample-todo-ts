@@ -16,7 +16,6 @@ makefile
 
 jest.*.js
 jest.*.ts
-tsconfig.*
 vite.*.ts
 firebase.*
 .firebaserc

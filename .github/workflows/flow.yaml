@@ -8,8 +8,7 @@ on:
 jobs:
   echo: 
     name: first job
+    runs-on: ubuntu-latest
     steps:
       - name: echo message
         run: echo "hello world"
-
-

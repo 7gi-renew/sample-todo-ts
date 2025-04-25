@@ -14,8 +14,6 @@ makefile
 .env.production
 .prettierrc.js
 
-jest.*.js
-jest.*.ts
 vite.config.d.ts
 firebase.*
 .firebaserc

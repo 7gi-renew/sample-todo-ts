@@ -1,0 +1,13 @@
+name: GitHub Deploy
+on:
+  push:
+     branches: 
+        - main
+
+jobs:
+  first-job: 
+    name: first job
+    steps:
+      - run: echo "hello world"
+
+

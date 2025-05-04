@@ -6,6 +6,6 @@ import App from "../App";
 describe("テスト1", () => {
   test("タイトルが存在している", async () => {
     render(<App />);
-    expect(screen.getByText("Vite + React")).toBeInTheDocument();
+    expect(screen.getByText("学習記録アプリ")).toBeInTheDocument();
   });
 });

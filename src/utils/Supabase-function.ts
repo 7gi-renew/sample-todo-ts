@@ -17,9 +17,9 @@ export const getData = async () => {
 };
 
 // データを挿入するための関数
-export const insertData = async (name: string, time?: number) => {
+export const insertData = async (title: string, time?: number | string) => {
   const { data, error } = await Supabase.from("study-record-ts").insert({
-    title: name,
+    title: title,
     time: time
   });
 
@@ -31,3 +31,12 @@ export const insertData = async (name: string, time?: number) => {
 };
 
 // データを削除するための関数
+export const deleteData = async (title: string, time?: number | string) => {
+  const { error } = await Supabase.from("study-record-ts")
+    .delete()
+    .match({ title, time });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};

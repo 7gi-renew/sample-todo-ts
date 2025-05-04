@@ -26,33 +26,37 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import "./App.css";
-import { getData, insertData } from "./utils/Supabase-function";
+import { getData, insertData, deleteData } from "./utils/Supabase-function";
 import { useEffect, useState } from "react";
 import { Record } from "./domain/record";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 
 function App() {
   const [todos, setTodos] = useState<Record[]>([]);
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  // クリックした回数を用いて仮のidを設定するためのstate
+  const [clickTime, setClickTime] = useState(0);
+
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors }
   } = useForm<Record>();
 
   const onSubmit: SubmitHandler<Record> = async data => {
-    const addTodoData = { title: data.title, time: data.time };
-    const newTodos = [...todos, addTodoData];
+    const addTodoData = { id: clickTime, title: data.title, time: data.time };
+    const newTodos: Array<Record> = [...todos, addTodoData];
 
-    const dataTime: number = parseInt(data.time);
-
-    await insertData(data.title, dataTime);
+    await insertData(data.title, data.time);
     setTodos(newTodos);
 
     onClose();
+
+    setClickTime(clickTime + 1);
 
     reset({
       title: "",
@@ -70,8 +74,15 @@ function App() {
     getTodo();
   }, []);
 
-  const dataDelete = index => {
-    console.log(index);
+  const dataDelete = (index: number) => {
+    const deleteItemTitle = todos[index].title;
+    const deleteItemTime = todos[index].time;
+
+    deleteData(deleteItemTitle, deleteItemTime);
+
+    todos.splice(index, 1);
+    const newTodos = [...todos];
+    setTodos(newTodos);
   };
 
   return (
@@ -100,8 +111,8 @@ function App() {
                       {errors.title?.message}
                     </Text>
                   )}
-
                   <FormLabel mt={4}>学習時間</FormLabel>
+                  {/* 
                   <NumberInput
                     defaultValue={0}
                     {...register("time", {
@@ -117,13 +128,42 @@ function App() {
                       <NumberIncrementStepper />
                       <NumberDecrementStepper />
                     </NumberInputStepper>
-                  </NumberInput>
-                  {/* errors will return when field validation fails  */}
-                  {errors.time && (
+                  </NumberInput> 
+                   {errors.time && (
                     <Text mt={1} color={"red.600"}>
                       {errors.time?.message}
                     </Text>
                   )}
+                  */}
+                  <Controller
+                    name="time"
+                    control={control}
+                    rules={{ required: true, min: 0 }}
+                    render={({ field }) => (
+                      <NumberInput
+                        value={field.value}
+                        onChange={valueString => {
+                          field.onChange(parseInt(valueString));
+                        }}
+                      >
+                        <NumberInputField />
+                        {errors.time?.type === "required" && (
+                          <Text mt={1} color={"red.600"}>
+                            時間の入力は必須です
+                          </Text>
+                        )}
+                        {errors.time?.type === "min" && (
+                          <Text mt={1} color={"red.600"}>
+                            時間の入力は必須です
+                          </Text>
+                        )}
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                    )}
+                  />
 
                   <Flex mt={8} justify={"right"}>
                     <Button variant="subtle" mr={3} onClick={onClose}>

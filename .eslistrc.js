@@ -8,6 +8,7 @@ module.exports = {
     // ESLintの推奨設定を使う
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    'prettier',
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {

@@ -2,7 +2,7 @@
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.node.json" }
   ],
 
   "compilerOptions": {
@@ -20,8 +20,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "strictPropertyInitialization": false,
     "jsx": "react-jsx",
     "types": ["node", "jest", "@testing-library/jest-dom"]
   },
-  "include": ["src"],
+  "include": ["src"]
 }

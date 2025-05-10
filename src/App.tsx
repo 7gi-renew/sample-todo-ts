@@ -72,7 +72,7 @@ function App() {
     };
 
     getTodo();
-  }, []);
+  });
 
   const dataDelete = (index: number) => {
     const deleteItemTitle = todos[index].title;
@@ -90,20 +90,21 @@ function App() {
       {loading && <p>now loading...</p>}
       {loading || (
         <>
-          <h1>学習記録アプリ</h1>
+          <h1 data-testid="title">学習記録アプリ</h1>
           <Button colorScheme="blue" onClick={onOpen} mt={4}>
             新規追加
           </Button>
 
-          <Modal isOpen={isOpen} onClose={onClose}>
+          <Modal isOpen={isOpen} onClose={onClose} data-testid="modal">
             <ModalOverlay />
             <ModalContent>
-              <ModalHeader></ModalHeader>
+              <ModalHeader>新規登録</ModalHeader>
               <ModalCloseButton />
               <ModalBody>
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <FormLabel>学習内容</FormLabel>
                   <Input
+                    data-testid="study-content"
                     {...register("title", { required: "内容の入力は必須です" })}
                   />
                   {errors.title && (
@@ -112,29 +113,6 @@ function App() {
                     </Text>
                   )}
                   <FormLabel mt={4}>学習時間</FormLabel>
-                  {/* 
-                  <NumberInput
-                    defaultValue={0}
-                    {...register("time", {
-                      required: "時間の入力は必須です",
-                      min: {
-                        value: 0,
-                        message: "時間は0以上である必要があります"
-                      }
-                    })}
-                  >
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput> 
-                   {errors.time && (
-                    <Text mt={1} color={"red.600"}>
-                      {errors.time?.message}
-                    </Text>
-                  )}
-                  */}
                   <Controller
                     name="time"
                     control={control}
@@ -154,7 +132,7 @@ function App() {
                         )}
                         {errors.time?.type === "min" && (
                           <Text mt={1} color={"red.600"}>
-                            時間の入力は必須です
+                            時間は0以上である必要があります
                           </Text>
                         )}
                         <NumberInputStepper>
@@ -191,7 +169,7 @@ function App() {
               </Thead>
               <Tbody>
                 {todos.map((todo, index) => (
-                  <Tr key={todo.id}>
+                  <Tr key={todo.id} data-testid="data">
                     <Td>{todo.title}</Td>
                     <Td>{todo.time}時間</Td>
                     <Td>

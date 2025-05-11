@@ -2,7 +2,7 @@ import { Supabase } from "../utils/Supabase";
 import { Record } from "../domain/record";
 
 // データの初期取得
-export async function getData() {
+export const getData = async () => {
   const response = await Supabase.from("study-record-ts").select("*");
 
   if (response.error) {
@@ -14,7 +14,7 @@ export async function getData() {
   });
 
   return responseData;
-}
+};
 
 // データを挿入するための関数
 export const insertData = async (title: string, time?: number | string) => {

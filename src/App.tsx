@@ -49,7 +49,7 @@ function App() {
 
   const onSubmit: SubmitHandler<Record> = async data => {
     const addTodoData = { id: clickTime, title: data.title, time: data.time };
-    const newTodos: Array<Record> = [...todos, addTodoData];
+    const newTodos = [...todos, addTodoData];
 
     await insertData(data.title, data.time);
     setTodos(newTodos);
@@ -72,7 +72,7 @@ function App() {
     };
 
     getTodo();
-  });
+  }, []);
 
   const dataDelete = (index: number) => {
     const deleteItemTitle = todos[index].title;

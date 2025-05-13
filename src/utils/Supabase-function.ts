@@ -40,3 +40,23 @@ export const deleteData = async (title: string, time?: number | string) => {
     throw new Error(error.message);
   }
 };
+
+// データを更新するための関数
+export const updateData = async (
+  title: string,
+  time?: number | string,
+  id?: number | string
+) => {
+  const { data, error } = await Supabase.from("study-record-ts")
+    .update({
+      title: title,
+      time: time
+    })
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};

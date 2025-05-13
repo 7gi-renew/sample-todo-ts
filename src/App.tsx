@@ -26,7 +26,12 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import "./App.css";
-import { getData, insertData, deleteData } from "./utils/Supabase-function";
+import {
+  getData,
+  insertData,
+  deleteData,
+  updateData
+} from "./utils/Supabase-function";
 import { useEffect, useState } from "react";
 import { Record } from "./domain/record";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
@@ -35,9 +40,16 @@ function App() {
   const [todos, setTodos] = useState<Record[]>([]);
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isModalAdd, setIsModalAdd] = useState(true);
+  const [editID, setEditID] = useState<number | string>(0);
+  const [editContent, setEditContent] = useState("");
+  const [editTime, setEditTime] = useState(0);
 
   // クリックした回数を用いて仮のidを設定するためのstate
   const [clickTime, setClickTime] = useState(0);
+
+  // 押した部分のインデックス番号を取得するための関数
+  const [pushIndex, setPushIndex] = useState(0);
 
   const {
     register,
@@ -46,23 +58,6 @@ function App() {
     control,
     formState: { errors }
   } = useForm<Record>();
-
-  const onSubmit: SubmitHandler<Record> = async data => {
-    const addTodoData = { id: clickTime, title: data.title, time: data.time };
-    const newTodos = [...todos, addTodoData];
-
-    await insertData(data.title, data.time);
-    setTodos(newTodos);
-
-    onClose();
-
-    setClickTime(clickTime + 1);
-
-    reset({
-      title: "",
-      time: 0
-    });
-  };
 
   useEffect(() => {
     const getTodo = async () => {
@@ -74,6 +69,60 @@ function App() {
     getTodo();
   }, []);
 
+  // 追加ボタンを押した時の処理
+  const onSubmit: SubmitHandler<Record> = async data => {
+    const addTodoData = { id: clickTime, title: data.title, time: data.time };
+    const newTodos = [...todos, addTodoData];
+
+    await insertData(data.title, data.time);
+    setTodos(newTodos);
+
+    onClose();
+
+    setClickTime(clickTime + 1);
+
+    reset();
+  };
+
+  // 更新ボタンを押した時の処理
+  const onEdit: SubmitHandler<Record> = async data => {
+    await updateData(data.title, data.time, editID);
+
+    const newUpdatedData = { id: editID, title: data.title, time: data.time };
+
+    todos.splice(pushIndex, 1, newUpdatedData);
+
+    onClose();
+
+    reset();
+  };
+
+  // 新規追加ボタンを押下した時の挙動
+  const openAddModal = () => {
+    setIsModalAdd(true);
+    reset();
+    onOpen();
+  };
+
+  const modalClose = () => {
+    onClose();
+  };
+
+  // 編集ボタンを押下した時の挙動
+  const openEditModal = (index: number) => {
+    reset();
+    setIsModalAdd(false);
+    setPushIndex(index);
+
+    const todoID = todos[index].id;
+
+    setEditID(todoID);
+    setEditContent(todos[index].title);
+    setEditTime(todos[index].time);
+    onOpen();
+  };
+
+  // 削除ボタンを押下した時の挙動
   const dataDelete = (index: number) => {
     const deleteItemTitle = todos[index].title;
     const deleteItemTime = todos[index].time;
@@ -91,22 +140,45 @@ function App() {
       {loading || (
         <>
           <h1 data-testid="title">学習記録アプリ</h1>
-          <Button colorScheme="blue" onClick={onOpen} mt={4}>
+          <Button colorScheme="blue" onClick={openAddModal} mt={4}>
             新規追加
           </Button>
 
-          <Modal isOpen={isOpen} onClose={onClose} data-testid="modal">
+          <Modal isOpen={isOpen} onClose={modalClose} data-testid="modal">
             <ModalOverlay />
             <ModalContent>
-              <ModalHeader>新規登録</ModalHeader>
+              {isModalAdd ? (
+                <ModalHeader>新規登録</ModalHeader>
+              ) : (
+                <ModalHeader>記録編集</ModalHeader>
+              )}
               <ModalCloseButton />
               <ModalBody>
-                <form onSubmit={handleSubmit(onSubmit)}>
+                {}
+                <form
+                  onSubmit={
+                    isModalAdd ? handleSubmit(onSubmit) : handleSubmit(onEdit)
+                  }
+                >
                   <FormLabel>学習内容</FormLabel>
-                  <Input
-                    data-testid="study-content"
-                    {...register("title", { required: "内容の入力は必須です" })}
-                  />
+
+                  {isModalAdd ? (
+                    <Input
+                      data-testid="study-content"
+                      {...register("title", {
+                        required: "内容の入力は必須です"
+                      })}
+                    />
+                  ) : (
+                    <Input
+                      data-testid="study-content"
+                      defaultValue={editContent}
+                      {...register("title", {
+                        required: "内容の入力は必須です"
+                      })}
+                    />
+                  )}
+
                   {errors.title && (
                     <Text mt={1} color={"red.600"}>
                       {errors.title?.message}
@@ -119,6 +191,7 @@ function App() {
                     rules={{ required: true, min: 0 }}
                     render={({ field }) => (
                       <NumberInput
+                        defaultValue={isModalAdd ? 0 : editTime}
                         value={field.value}
                         onChange={valueString => {
                           field.onChange(parseInt(valueString));
@@ -142,13 +215,12 @@ function App() {
                       </NumberInput>
                     )}
                   />
-
                   <Flex mt={8} justify={"right"}>
-                    <Button variant="subtle" mr={3} onClick={onClose}>
+                    <Button variant="subtle" mr={3} onClick={modalClose}>
                       閉じる
                     </Button>
                     <Button colorScheme="blue" type="submit">
-                      追加
+                      {isModalAdd ? "追加" : "更新"}
                     </Button>
                   </Flex>
                 </form>
@@ -164,7 +236,8 @@ function App() {
                 <Tr>
                   <Th>学習内容</Th>
                   <Th>時間</Th>
-                  <Th>削除</Th>
+                  <Th></Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -174,6 +247,14 @@ function App() {
                     <Td>{todo.time}時間</Td>
                     <Td>
                       <Button onClick={() => dataDelete(index)}>削除</Button>
+                    </Td>
+                    <Td>
+                      <Button
+                        colorScheme="teal"
+                        onClick={() => openEditModal(index)}
+                      >
+                        編集
+                      </Button>
                     </Td>
                   </Tr>
                 ))}

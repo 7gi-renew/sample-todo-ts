@@ -2,13 +2,13 @@ export class Record {
   constructor(
     public id: string | number,
     public title: string,
-    public time: string | number
+    public time: number
   ) {}
 
   public static newRecord(
     id: string | number,
     title: string,
-    time: string | number
+    time: number
   ): Record {
     return new Record(id, title, time);
   }

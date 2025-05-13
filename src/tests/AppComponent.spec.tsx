@@ -3,23 +3,23 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import App from "../App";
 import { Record } from "../domain/record";
-// import { fireEvent } from "@testing-library/react";
-// import { insertData } from "../utils/Supabase-function";
 
 const mockData = jest
   .fn()
   .mockResolvedValue([
-    new Record("1", "課題a", "10"),
-    new Record("2", "課題b", "5")
+    new Record("1", "課題a", 10),
+    new Record("2", "課題b", 5)
   ]);
 
 const mockInsertData = jest.fn().mockResolvedValue(undefined);
+const mockUpdateData = jest.fn().mockResolvedValue(undefined);
 
 jest.mock("../utils/Supabase-function.ts", () => {
   return {
     getData: () => mockData(),
     insertData: (...args: any[]) => mockInsertData(...args),
-    deleteData: jest.fn()
+    deleteData: jest.fn(),
+    updateData: (...args: any[]) => mockUpdateData(...args)
   };
 });
 
@@ -171,13 +171,51 @@ describe("テスト1", () => {
       await userEvent.click(deleteTargetButton);
 
       AfterTableNum = await screen.getAllByTestId("data").length;
-
-      await console.log(beforeTableNum);
-      await console.log(AfterTableNum);
-
       await expect(AfterTableNum).toBe(beforeTableNum - 1);
 
       // beforeTableNum = targetDeleteBtn.length;
+    });
+  });
+
+  test("編集ボタンを押した時のモーダルの名前が記録編集である", async () => {
+    render(<App />);
+
+    await waitFor(async () => {
+      const editButton = screen.getByRole("button", { name: "編集" });
+      await userEvent.click(editButton);
+      await expect(screen.getByText("記録編集")).toBeInTheDocument();
+    });
+  });
+
+  test("更新ボタンを押したときに新しい値に更新されている", async () => {
+    render(<App />);
+
+    // 編集ボタンをクリックする
+    await waitFor(async () => {
+      // モーダルに値を入れて更新ボタンを押す
+      const editButton = screen.getByRole("button", { name: "編集" });
+
+      await userEvent.click(editButton);
+
+      // フォームに値を挿入し、追加のボタンを押下
+      const studyContentForm = await screen.getByRole("textbox");
+      const studyTimeForm = await screen.getByRole("spinbutton");
+
+      await userEvent.clear(studyContentForm);
+      await userEvent.clear(studyTimeForm);
+      await userEvent.type(studyContentForm, "テスト課題A");
+      await userEvent.type(studyTimeForm, "40");
+
+      const updateButton = (await screen.queryByRole("button", {
+        name: "更新"
+      })) as Element;
+
+      await userEvent.click(updateButton);
+    });
+
+    await waitFor(async () => {
+      expect(screen.getByText("テスト課題A")).toBeInTheDocument();
+      expect(screen.getByText("40時間")).toBeInTheDocument();
     });
   });
 });

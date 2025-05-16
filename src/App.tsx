@@ -2,6 +2,7 @@ import {
   Button,
   Flex,
   FormLabel,
+  IconButton,
   Input,
   Modal,
   ModalBody,
@@ -26,6 +27,7 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import "./App.css";
+import { MdDelete, MdOutlineEdit } from "react-icons/md";
 import {
   getData,
   insertData,
@@ -44,9 +46,6 @@ function App() {
   const [editID, setEditID] = useState<number | string>(0);
   const [editContent, setEditContent] = useState("");
   const [editTime, setEditTime] = useState(0);
-
-  // クリックした回数を用いて仮のidを設定するためのstate
-  const [clickTime, setClickTime] = useState(0);
 
   // 押した部分のインデックス番号を取得するための関数
   const [pushIndex, setPushIndex] = useState(0);
@@ -71,15 +70,11 @@ function App() {
 
   // 追加ボタンを押した時の処理
   const onSubmit: SubmitHandler<Record> = async data => {
-    const addTodoData = { id: clickTime, title: data.title, time: data.time };
-    const newTodos = [...todos, addTodoData];
-
     await insertData(data.title, data.time);
+    const newTodos = await getData();
     setTodos(newTodos);
 
     onClose();
-
-    setClickTime(clickTime + 1);
 
     reset();
   };
@@ -113,6 +108,8 @@ function App() {
     reset();
     setIsModalAdd(false);
     setPushIndex(index);
+
+    console.log(todos);
 
     const todoID = todos[index].id;
 
@@ -246,15 +243,19 @@ function App() {
                     <Td>{todo.title}</Td>
                     <Td>{todo.time}時間</Td>
                     <Td>
-                      <Button onClick={() => dataDelete(index)}>削除</Button>
+                      <IconButton
+                        icon={<MdDelete />}
+                        aria-label="delete"
+                        onClick={() => dataDelete(index)}
+                      />
                     </Td>
                     <Td>
-                      <Button
+                      <IconButton
+                        icon={<MdOutlineEdit />}
                         colorScheme="teal"
+                        aria-label="edit"
                         onClick={() => openEditModal(index)}
-                      >
-                        編集
-                      </Button>
+                      />
                     </Td>
                   </Tr>
                 ))}

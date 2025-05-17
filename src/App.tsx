@@ -246,6 +246,7 @@ function App() {
                       <IconButton
                         icon={<MdDelete />}
                         aria-label="delete"
+                        as="button"
                         onClick={() => dataDelete(index)}
                       />
                     </Td>
@@ -254,6 +255,7 @@ function App() {
                         icon={<MdOutlineEdit />}
                         colorScheme="teal"
                         aria-label="edit"
+                        as="button"
                         onClick={() => openEditModal(index)}
                       />
                     </Td>
